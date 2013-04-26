@@ -1,4 +1,4 @@
-python "FulHack.py"
+python "NewImageWindow.py"
 
 pause
 del "%0"

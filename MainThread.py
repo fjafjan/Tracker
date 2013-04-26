@@ -171,24 +171,33 @@ class MainThread(threading.Thread):
 		#	print "we are taking approximately ", (dt*fps_max)*100 ,"% of the CPU"
 			time.sleep(time_to_sleep)
 			print " \n" # just to separate the iterations more.
+
+
 	def check_queues(self):
 		if not self.order_list.empty():
 			order = self.order_list.get()
 			if order == "stop":
-				## close connection to step engine and pump
-				
+				## close connection to step engine
+				StopAxes()
+				Disconnect() 
+				## close connection to the pump
 				state.pump.CloseConnection()
+				
+				## Should close various files as well? I think opening them next time will solve that.
+				
 				import sys
-				sys.exit()
-				# stop the program somehow
-				pass
+				sys.exit()				
 			image_commands = ["nothing", "main_contour", "original", "all_contours"]
 			if order in image_commands:
 				self.image_to_show = order
+			
+			option_commands  = ["calibrate", "average", "starting_left", "starting_right"]
+			if order in option_commands:
+				pass
+				
 		else:
 			pass
 			# print "OUR ORDERS WERE EMPTY WTF WTF WTF WTF"
-			# Add other possible orders here
 
 #im_list 	= Queue.Queue()
 #order_list 	= Queue.Queue()
