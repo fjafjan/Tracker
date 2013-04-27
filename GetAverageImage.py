@@ -1,12 +1,22 @@
-import numpy as np
+ import numpy as np
 import Image , ImageGrab
 
 from StepControl import *
 
-def GetAverageImage(averages, start_x, iter_step, box):
+def GetAverageImage(options, box) :
+	
+#	Set up where our averaging should start
+	if options.starting_left:
+		start_x = 0
+	else:
+		start_x = -35
+	MoveToAbsolutePosition(start_x,0,0,0,1) ## We assume that we are at the left inlet
+
+	iter_step = 0.5
 	aver_ims = []
 	averages  = 40
-	nothing = raw_input("Press enter when you are ready to remove static noise")
+#	Now that we have a gui we don't really need this thing.
+#	nothing = raw_input("Press enter when you are ready to remove static noise")
 	for i in range(0,averages):
 		MoveToAbsolutePosition(start_x+(iter_step*i),0,0,0,1) ## We assume that we are at the left inlet
 		aver_ims.append(ImageGrab.grab(box))
