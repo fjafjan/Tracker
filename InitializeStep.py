@@ -26,16 +26,15 @@ def InitializeStepEngine(box, options):
 	
 	## 	 	We find the appropriate starting position
 	if options.starting_left:
-		start_x, iter_step = 0, -0.5
+		start_x = 0
 	else:
-		start_x, iter_step = -35, 0.5
+		start_x = -35
 	MoveToAbsolutePosition(start_x,0,0,0,1) ## We assume that we are at the left inlet
 	
 	
 	## 	 	If we do not have a good average image, we fix that.
 	if options.needs_average:
-		averages = 25
-		dirt_arr = GetAverageImage(averages, start_x, iter_step, box)
+		dirt_arr = GetAverageImage(options, box)
 	else:
 		dirt_im = Image.open("Images/Averaging/average_image.jpg")
 		dirt_arr = np.array(dirt_im) 
