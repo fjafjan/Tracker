@@ -1,12 +1,14 @@
 from StepControl import *
 import numpy as np
-import ImageGrab, Image, ImageDraw, time, ImageOps
+from PIL import ImageGrab, Image, ImageDraw, ImageOps
+import time
 from ast import *
 
 ## THINK A BIT ABOUT THIS FUNCTION SO THAT IT IS REASONABLE
 ## As far as I can see it is looking pretty reasonable. 
-def Callibrate(new_calibration):
+def Calibrate(new_calibration):
 	if new_calibration:
+		ConnectSimple(1, "COM4", 9600, 0)
 		calibration_file = open("MetaData/calibration.txt", 'w')
 		SetJoystickOn()
 		SetVelocity(5, 5, 0, 0,max_vel=5)
@@ -19,6 +21,7 @@ def Callibrate(new_calibration):
 		calibration_file.write(str(left_inlet[0]) +","+ str(left_inlet[1])+"\n")
 		print "The y difference is ", left_inlet[1] - right_inlet[1]
 		SetJoystickOff()
+		print "calibration completed"
 	else:
 		inlet_file = open("calibration.txt", 'r')
 		left_inlet = eval(inlet_file.readline())

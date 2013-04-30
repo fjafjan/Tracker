@@ -35,7 +35,7 @@ from sys import exit
 #setpriority()
 
 class MainThread(threading.Thread):
-	def __init__(self, queues):
+	def __init__(self, queues, options):
 		threading.Thread.__init__(self)
 		im_list, order_list = queues
 		self.im_list = im_list
@@ -43,6 +43,7 @@ class MainThread(threading.Thread):
 		time.sleep(1)
 		self.order_list = order_list
 		self.image_to_show = "main_contour"	
+		self.options = options
 
 
 	def run(self):
@@ -64,16 +65,17 @@ class MainThread(threading.Thread):
 		self.parameters  	= DetectorParameters() 
 
 		# option holding object
-		options 		= DetectorOptions()
+		options 		= self.options
 		options.testing_disconnected= False
 		options.printing_output 	= True
-		options.starting_left   	= False
+		options.starting_left   	= True
 		options.needs_average 		= False
 		options.saving_directory    = "E:/staffana/Feb 26/"
 
 		# state holding object. Could be replaced if we implement a Kalman filter
-		state			= DetectorState(self.parameters, options)
-
+		self.state			= DetectorState(self.parameters, options)
+		state = self.state # I think this is safe. 
+				
 		# Object stores the times taken for various computations in this class.
 		timedata		= TimeData()					# The "class" that handles all the times we meassure
 
@@ -120,6 +122,7 @@ class MainThread(threading.Thread):
 			
 				#### PERFORM EDGE DETECTION AND CONTOUR DETECTION 
 			timedata.contour_start 	= time.clock()
+			
 			contours, pix  			= GetContours(im, aver_im, 210, options.printing_output, i)
 			timedata.contour_end	= time.clock()
 			
@@ -177,11 +180,12 @@ class MainThread(threading.Thread):
 		if not self.order_list.empty():
 			order = self.order_list.get()
 			if order == "stop":
+				print "WE HAVE ORDERED TO STOP!!!!"
 				## close connection to step engine
 				StopAxes()
 				Disconnect() 
 				## close connection to the pump
-				state.pump.CloseConnection()
+				self.state.pump.CloseConnection()
 				
 				## Should close various files as well? I think opening them next time will solve that.
 				

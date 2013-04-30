@@ -81,6 +81,7 @@ def FindCorrectionVector(rod_pos, rod_vel, middle):
 	print "our found correction vec is ", correction_vec, " and our percieved rod_vel is ", rod_vel
 	correction_vec = correction_vec*pixel_2_step*0.8 # We try making it just a little bit smaller so that the velocity changes don't overshoot so much...
 	correction_vec[1] = correction_vec[1]*0.5 # Vertical movements should be less extreme and require less extreme corrections
+	print "correction vector adjusted for pixel 2 step is ", correction_vec
 #	find_corr_time = clock() - t0
 	return correction_vec, moving
 

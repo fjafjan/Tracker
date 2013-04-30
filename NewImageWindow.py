@@ -1,4 +1,5 @@
 from Tkinter import *
+import tkFileDialog
 from PIL import ImageTk, Image
 from time import sleep
 import os, sys
@@ -98,14 +99,17 @@ class Viewer:
 		averb  = Button(option_fr, text="Generate average image", command = lambda: self.options_queue("average"))
 		averb.grid(row=1, column=1, sticky="w", pady=4) 
 		
+		file_button = Button(option_fr, text = "Select saving directory", command = lambda: self.set_save_directory())
+		file_button.grid(row=2, column=0, sticky="w", pady=4)
+		
 		file_label = Label(option_fr, text="Savig directory:")
-		file_label.grid(row=2, column=0, sticky="w", pady=4)
+		file_label.grid(row=2, column=1, sticky="w", pady=4)
 		## evar is the number in the windows
 		## entry is the "frame" that holds evar.
 		self.direct_var = StringVar()
 		self.direct_var.set(self.options.saving_directory)
-		entry = Entry(option_fr, textvariable=self.direct_var, width=19)
-		entry.grid(row=2, column=1, sticky="w", pady=4)
+		entry = Entry(option_fr, textvariable=self.direct_var, width=40)
+		entry.grid(row=2, column=2, sticky="w", pady=4)
 		## Starting left, starting right
 		## Save images
 		## Calibrate
@@ -138,7 +142,7 @@ class Viewer:
 		im_list 	= self.image_queue
 		order_list 	= self.order_queue
 		queues		= im_list, order_list
-		self.tracker = MainThread(queues)
+		self.tracker = MainThread(queues, self.options)
 		self.tracker.start()
 		self.update_image()
 
@@ -168,9 +172,13 @@ class Viewer:
 	def options_queue(self, command):
 		valid_commands = ["calibrate", "average", "starting_left", "starting_right"]
 		if command in valid_commands:
-			if command="calibrate":
+			if command == "calibrate":
 				from Calibrate import Calibrate
 				Calibrate(new_calibration=True)
+			elif command == "average":
+				from GetAverageImage import GetAverageImage
+				GetAverageImage(self.options)
+				## This might be trouble as we are using a variable from another thread directly instead of from a queue
 			else:
 				self.order_queue.put(command)
 
@@ -179,7 +187,15 @@ class Viewer:
 		self.tkimage.paste(im)
 		self.end_image_update = True
 		self.paused = True
-		
+	
+	def set_save_directory(self):
+		 folder = tkFileDialog.askdirectory()
+		 self.direct_var.set(folder)
+		 self.options.saving_directory = folder
+		 print "folder is ", folder
+		 filename = get_filename(folder + "/position_tracking.txt")
+		 self.options.extra_file = open(filename, 'w')
+
 def test_this():
 	#filelist = ["C:/test.jpg", "C:/testingnew.jpg", "C:/hej.jpg"]
 	im1 = Image.open("C:/test.jpg")

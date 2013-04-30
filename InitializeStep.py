@@ -20,9 +20,8 @@ def InitializeStepEngine(box, options):
 
 	
 	## 		We callibrate our positions, so that the inlets are where we wants them to be
-	left_inlet, right_inlet = Callibrate(options.needs_calibrate)
+	left_inlet, right_inlet = Calibrate(options.needs_calibrate)
 	# We don't actually do anything with them atm :D
-	
 	
 	## 	 	We find the appropriate starting position
 	if options.starting_left:
@@ -34,7 +33,7 @@ def InitializeStepEngine(box, options):
 	
 	## 	 	If we do not have a good average image, we fix that.
 	if options.needs_average:
-		dirt_arr = GetAverageImage(options, box)
+		dirt_arr = GetAverageImage(options)
 	else:
 		dirt_im = Image.open("Images/Averaging/average_image.jpg")
 		dirt_arr = np.array(dirt_im) 
@@ -42,7 +41,7 @@ def InitializeStepEngine(box, options):
 		
 	## Remove old image files if we intend to save new ones
 	if options.printing_output:
-		nothing = raw_input("Press enter to remove old image files")
+#		nothing = raw_input("Press enter to remove old image files")
 		contour_folder =  "Images/Contours"
 		positions_folder = "Images/Positions"
 		clear_folder(contour_folder) # Makes sure we only store the images from this particular run. 

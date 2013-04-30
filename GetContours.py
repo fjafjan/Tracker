@@ -29,8 +29,10 @@ def GetContours(im, aver_im, thresh,printing_output, iteration):
 	
 	## If desired we save the image before and after removing the noise
 	if printing_output:
-		Image.fromarray(pix).save("Images/Averaging/" + str(iteration) + "post_average.jpg")
-		Image.fromarray(pix_pre).save("Images/Averaging/" + str(iteration) + "pre_average.jpg")
+#		Image.fromarray(pix).save("Images/Averaging/" + str(iteration) + "post_average.jpg")
+#		Image.fromarray(pix_pre).save("Images/Averaging/" + str(iteration) + "pre_average.jpg")
+
+		## This saves all the contours. We should add o the image queue here. 
 		save_image_as(array(edges), array([array([array([])])]), "contours" + str(iteration))
 		
 	

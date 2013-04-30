@@ -40,16 +40,7 @@ def MoveToRelativePosition(X, Y, Z, A, wait, print_error=False):
 	if print_error or error_code != 0:
 		print "Our error code for moving was ", error_code
 
-def SetPosition(X, Y, Z, A, print_error=False):
-	set_position = Step4['LS_SetPos']
-	x_pos = ctypes.c_double(X)
-	y_pos = ctypes.c_double(Y)
-	z_pos = ctypes.c_double(Z)
-	a_pos = ctypes.c_double(A)
-	error_code = ctypes.c_int32(-1)
-	error_code = set_position(x_pos,y_pos, z_pos, a_pos)
-	if print_error or error_code != 0:
-		print "Our error code for moving was ", error_code
+
 
 
 def FlushBuffer(print_error=False):

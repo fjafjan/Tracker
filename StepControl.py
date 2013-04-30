@@ -39,6 +39,16 @@ def SetVelocity(x_vel, y_vel, z_vel, a_vel, max_vel=2.0, print_error=False):
 	if print_error or error_code != 0:
 		print "we tries setting speed to ", x_vel_c, y_vel_c, " and we got error code ", error_code
 
+def SetPosition(X, Y, Z, A, print_error=False):
+	set_position = Step4['LS_SetPos']
+	x_pos = ctypes.c_double(X)
+	y_pos = ctypes.c_double(Y)
+	z_pos = ctypes.c_double(Z)
+	a_pos = ctypes.c_double(A)
+	error_code = ctypes.c_int32(-1)
+	error_code = set_position(x_pos,y_pos, z_pos, a_pos)
+	if print_error or error_code != 0:
+		print "Our error code for moving was ", error_code
 
 def GetPosition(print_error=False):
 	GetPos = Step4['LS_GetPos']
@@ -66,6 +76,8 @@ def MoveToAbsolutePosition(X, Y, Z, A, wait, print_error=False):
 def Disconnect(print_error=False):
 	disconnect = Step4['LS_Disconnect']
 	error_code = ctypes.c_int32(-1)
+	if error_code != 0:
+		print "Our error code for disconnecting was ", error_code
 	error_code = disconnect()
 
 def SetJoystickOn(pos_count=True, encoder=True, print_error=False):

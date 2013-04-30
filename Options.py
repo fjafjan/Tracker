@@ -38,22 +38,31 @@ class DetectorParameters:
 		self.vel_fac 			= 1/10.
 
 		#~ self.x,self.y			= 1490, 205 				# The x,y coordinates of the top left corner of what we want to crop
-		self.x,self.y			= 1290, 105 				# The x,y coordinates of the top left corner of what we want to crop
-		#~ self.x, self.y			= 0, 0
-		#~ self.width, self.height = 365, 275
-		self.width, self.height = 560, 420
-		self.step_2_pixel   	= 940.
-		self.pixel_2_step   	= 1./self.step_2_pixel
-		self.size 				= (self.width, self.height)           # The resultant size of our image after resizing
-		self.middle 			= [self.size[0]/2, self.size[1]/2]    # We want our particle to be close to the middle.
+				#~ self.width, self.height = 365, 275
+
+		self.x,self.y			= 1295, 105 				# The x,y coordinates of the top left corner of what we want to crop
+		self.width, self.height = 540, 340
+		self.size 				= (self.width, self.height)         # The resultant size of our image after resizing
+		self.middle 			= [self.size[0]/2, self.size[1]/2]  # We want our particle to be close to the middle.
 		self.box 				= (self.x,self.y,self.x+self.width,self.y+self.height)    # The bounding box for our cropping
+
+		self.step_2_pixel		= 1300.
+#		self.step_2_pixel   	= 940.								# The step engine distance to pixel ratio of the 20x microscope.
+		self.pixel_2_step   	= 1./self.step_2_pixel				
 
 		# these are the settings we used for full screen higher setting images, but really we don't need em...
 		#x,y  				= 1155, 215
 		#width, height 		= 685, 530
 		#width, height 		= 1170, 780             	# The size of the image we want to crop
 		#step_2_pixel   		= 1680
-
+	
+	def change_microscope_objective():
+		pass
+		# step_2_pixel = XXX
+		
+		
+		## So the first thing to do is to change the pixel to step ratio, but the second question is if there are any static variables defined from these parameters 
+		## will need to be updated?
 
 
 
@@ -102,6 +111,7 @@ class DetectorState:
 			if self.counter > parameters.max_misses:
 				StopAxes()
 				print "Contour not found in ", parameters.max_misses, " frames, program exiting"
+				self.shut_down()
 				exit()
 			timedata.iteration_end = time.clock()
 			return 
@@ -205,6 +215,12 @@ class DetectorState:
 				self.reverse_counter = 0
 				self.flowing_right = not self.flowing_right # This just flips the value
 		self.reverse_cooldown += 1
-
+	
+	# Closes all connections and files and shuts down.
+	def shut_down(options):
+		TerminateStepConnection(options.starting_left)
+		self.pump.CloseConnection()
+		return
+		
 
 
