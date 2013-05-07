@@ -1,11 +1,18 @@
+import cv2
+import numpy as np
+import ImageGrab, Image, ImageDraw, time, ImageOps
+
+
 from StepControl import *
 from Calibrate import * 
 from GetAverageImage import GetAverageImage
-import numpy as np
-import ImageGrab, Image, ImageDraw, time, ImageOps
 from utilities import *
+from GetContours import *
+from DetectParticle import *
+from Options import *
 
-def InitializeStepEngine(box, options):	
+
+def InitializeStepEngine(order_list, image_list, options, parameters, timedata):	
 	## 		Connect to the step engine and turn off the joystick
 	ConnectSimple(1, "COM4", 9600, 0)
 	SetJoystickOff() #   
@@ -51,24 +58,42 @@ def InitializeStepEngine(box, options):
 
 	##	 	We let the user find a particle
 	SetJoystickOn(True, True)
-	nothing = raw_input("Press enter when particle is located")
+	print "Press the star tracking button to initiate tracking of the particle closes to the middle"
+	
+	state = DetectorState(parameters, options)
+	state.speed_error = speed_error
+	state.vel_fac = [x_vel_fac, y_vel_fac]
 
+	
+	while True:
+		if not order_list.empty():
+			if order_list.get() == "start_tracking":
+				break
+		im = ImageGrab.grab(parameters.box)
+		contours, pix  	= GetContours(im, dirt_arr, 210, printing_output=False, iteration=0)
+		best_contour_nr, positions = DetectParticle(state,contours,0, timedata,pix, parameters, options) # i is the current nr of runs
+		cv2.drawContours(pix,[contours[best_contour_nr]],-1,(0,255,0),3)
+		im = Image.fromarray(pix)
+		image_list.put(im)
+		sleep(1./parameters.fps_max)
 	
 	##	 	We find the velocity we were going at
 	vel_approx = CalcVelocity(0.1)
 	print "vel approx is ", vel_approx
-	speed1 = CalcSpeed(vel_approx)
-	if speed1 < 0.005:
-		print "You need to move the joystick, try again"
-		exit()
-	
-	going_right = vel_approx[0]<0
-	print " We think we are going right: ", going_right
+
+
+	state.step_vel = np.array([vel_approx[0],vel_approx[1]])
+	state.going_right = vel_approx[0]<0
+	print " We think we are going right: ", state.going_right
+
 	## 		We set the step engine to move at this speed
 	SetJoystickOff()
 	##### MAYBE WE SHOULD INCLUDE THE SPEED ERROR HERE? I THINK SO BUT LET'S TEST THAT IT'S REASONABLE FIRST
 	SetSpeed(vel_approx[0]/x_vel_fac, vel_approx[1]/y_vel_fac, 0, 0, max_speed = 3.0/(min(x_vel_fac, y_vel_fac)))
-	return np.array([vel_approx[0],vel_approx[1]]), dirt_arr, speed_error, [x_vel_fac, y_vel_fac], going_right
+	
+	 
+#	return np.array([vel_approx[0],vel_approx[1]]), dirt_arr, speed_error, [x_vel_fac, y_vel_fac], going_right
+	return dirt_arr, state
 
 
 

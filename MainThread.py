@@ -73,8 +73,7 @@ class MainThread(threading.Thread):
 		options.saving_directory    = "E:/staffana/Feb 26/"
 
 		# state holding object. Could be replaced if we implement a Kalman filter
-		self.state			= DetectorState(self.parameters, options)
-		state = self.state # I think this is safe. 
+		#self.state			= DetectorState(self.parameters, options)
 				
 		# Object stores the times taken for various computations in this class.
 		timedata		= TimeData()					# The "class" that handles all the times we meassure
@@ -84,9 +83,10 @@ class MainThread(threading.Thread):
 
 		#### CONNECT TO THE STEP MOTOR AND LET THE USER FIND A PARTICLE
 		if not options.testing_disconnected:
-			outputs = InitializeStepEngine(self.parameters.box, options)
-			state.step_vel, aver_im, state.speed_error, state.vel_fac, state.going_right = outputs
-			
+			aver_im, self.state = InitializeStepEngine(self.order_list, self.im_list, options, self.parameters, timedata)
+			#~ state.step_vel, aver_im, state.speed_error, state.vel_fac, state.going_right = outputs
+
+			state = self.state # I think this is safe. 
 			## Since right means minus on the step engine, we simply check if our velocity is negative or not
 			state.going_right = state.step_vel < 0
 			### TRY TO OPEN A SEPARATE WINDOW WHERE THE USER CAN PRESS STOP MAYBE BUT FIRST JUST SHOW IT
@@ -130,7 +130,7 @@ class MainThread(threading.Thread):
 			best_contour_nr, positions = DetectParticle(state,contours,i, timedata,pix, self.parameters, options) # i is the current nr of runs
 			# To save space we could possibly merge contours with state? It seems a bit weird either way...
 			## Updates the state based on the particle we have, or have not, found.
-			state.update(best_contour_nr, contours, positions, self.parameters, i, timedata)
+			state.update(best_contour_nr, contours, positions, self.parameters, i, timedata, options)
 
 			## If we are printing output we save a picture of the chosen contour
 			if options.printing_output:

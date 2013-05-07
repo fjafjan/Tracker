@@ -62,7 +62,7 @@ def print_stats(state, j, position,  rank, badness, weights, acc, timedata, opti
 
 	old_vel 		= state.rod_vel
 	#			(j, position, old_pos, timedata, badness_file, state, rank, badness, weights, acc, ,parameters)
-	curr_fps  = 1/(timedata.image_start - timedata.image_old)
+	curr_fps  = 1/(timedata.image_start - timedata.image_old + 0.0001)
 	corr_time = (timedata.detection_start - timedata.step_control_end)
 	momentum, dist_weight, move_weight, thinness, acc = weights
 	dist_from_center = sqrt((position[0]-parameters.middle[0])**2+(position[1]-parameters.middle[1])**2 )
@@ -83,7 +83,7 @@ def save_contour_image(j, contours, pix, rank, run_nr):
 	im = Image.fromarray(pix_copy)
 	im.save("Images/Contours/Frame" + str(run_nr)+  "_rank" + str(rank)+" particle_nr "+str(j)+ ".jpg")
 
-def save_position_images(best_pos,old_pos, old_vel, curr_fps, expected_pos, pix, frame_nr, particle_nr):
+def save_position_images(best_pos,old_pos, old_vel, curr_fps, expected_pos, pix, frame_nr, particle_nr, parameters):
 	pix_copy = pix.copy()
 	
 	## Add legend to picture
@@ -99,19 +99,19 @@ def save_position_images(best_pos,old_pos, old_vel, curr_fps, expected_pos, pix,
 	if tuple(const_vel_pos) in (tuple(pos) for pos in (expected_pos, old_pos, best_pos)):
 #		print "const vel pos overlaps"
 		particle_size += 2 
-	pix_point = add_point_to_image(const_vel_pos, pix_copy,  color=colors[3], size=particle_size)
+	pix_point = add_point_to_image(const_vel_pos,  pix_copy, parameters.middle,  color=colors[3], size=particle_size)
 
 	if tuple(expected_pos) in (tuple(pos) for pos in (old_pos, best_pos)):
 #		print "expected pos overlap"
 		particle_size += 1
-	pix_point = add_point_to_image(expected_pos,  pix_point, color=colors[2], size=particle_size)
+	pix_point = add_point_to_image(expected_pos,  pix_point, parameters.middle, color=colors[2], size=particle_size)
 
 	if tuple(old_pos) == tuple(best_pos):
 #		print "old pos and best pos overlap"
 		particle_size += 1
-	pix_point = add_point_to_image(old_pos, 	  pix_point, color=colors[1], size=particle_size)
+	pix_point = add_point_to_image(old_pos,		pix_point, parameters.middle, color=colors[1], size=particle_size)
 
-	pix_point = add_point_to_image(best_pos,  	  pix_point, color=colors[0], size=particle_size)
+	pix_point = add_point_to_image(best_pos, 	pix_point, parameters.middle, color=colors[0], size=particle_size)
 	im = Image.fromarray(pix_point)
 
 	name  = "particle_"+str(particle_nr)
@@ -120,15 +120,14 @@ def save_position_images(best_pos,old_pos, old_vel, curr_fps, expected_pos, pix,
 	#pix_point = save_point_image(very_old_pos, pix_point, "very_old_pos", (255, 140,105), run_nr)
 	
 
-def add_point_to_image(position_in, pix, run_nr=-1, flip=True, color=(0,255,0), size=3):
+def add_point_to_image(position_in, pix, middle, run_nr=-1, flip=True, color=(0,255,0), size=2):
 	pix_copy = pix.copy()
 	if type(color) == str:
 		color = ImageColor.getrgb(color)
 	position_c = list(position_in)
 	position = array([int(position_c[0]), int(position_c[1])])
-	mid = [365/2, 275/2]       # We want our particle to be close to the middle.
 	if flip: # If we need to flip the y position to get it to align with the image
-		position[1] = (2*mid[1]) - position_c[1]
+		position[1] = (2*middle[1]) - position_c[1]
 	if position[0] < 1:  #I am not sure if the 0 point is OK, probably but better safe than sorry
 		position[0] = 1
 #		print "we have particle ", run_nr, " to the corner from ", position_in

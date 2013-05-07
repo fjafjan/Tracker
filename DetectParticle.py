@@ -55,18 +55,18 @@ def DetectParticle(state,contours,run_nr, timedata,pix, parameters, options):
 	timedata.detection_start = clock()
 
 	# some ugly initializations
-	old_pos   = state.old_pos #.copy()
-	old_pos[1]= state.average_y
-	curr_fps  = 1/(timedata.image_start - timedata.image_old)
-	corr_time = (timedata.detection_start - timedata.step_control_end)
-	print "the time for the correction_vec to act is ", corr_time, " and our current fps is approx ", curr_fps, " and our current position is ", old_pos
+	if run_nr > 0:
+		old_pos   = state.old_pos
+		old_pos[1]= state.average_y
+		curr_fps  = 1/(timedata.image_start - timedata.image_old)
+		corr_time = (timedata.detection_start - timedata.step_control_end)
+		print "the time for the correction_vec to act is ", corr_time, " and our current fps is approx ", curr_fps, " and our current position is ", old_pos
 
 	least_bad = [100000000]*nr_of_bad
 	sizes = array([]) ## We then append this array to the big array
 	badness, velocity, position = zeros(len(contours)), zeros((len(contours),2)), zeros((len(contours),2))
 	accelerations = zeros(len(contours))
 	found_particle = False
-
 	
 	t0 = clock()
 	for j in range(0,len(contours)):
@@ -88,7 +88,6 @@ def DetectParticle(state,contours,run_nr, timedata,pix, parameters, options):
 		tmp_pos = np.sum(contours[j], axis=0)          # Calculate position
 		position[j] = tmp_pos[0]/len(contours[j])      # Normalize, the pos[0] is because of an extra layer of nothing
 		position[j][1] = (parameters.middle[1]*2)-position[j][1]  # Makes the y-axis positive, ie bottom up and not the opposite
-			
 		## Add badness to particles for their acceleration or if they are too close to the center
 		## Note we can't consider the speed/acceleration the first frame, as we have no reference point. 
 		## Instead we then consider it's distance from the center as the primary attribute
@@ -139,7 +138,7 @@ def DetectParticle(state,contours,run_nr, timedata,pix, parameters, options):
 			least_bad_added[rank] += thinness
 			#~ print "2) we added the particle ", j, " with position ", position[j]
 			if options.printing_output:
-				pix_point = add_point_to_image(position[j], pix, color="Red", size=3) 
+				pix_point = add_point_to_image(position[j], pix, parameters.middle, color="Red", size=3) 
 				save_contour_image(j, contours, pix_point, rank, run_nr)
 			#~ print "3) we added the particle ", j, " with position ", position[j]
 
@@ -168,7 +167,7 @@ def DetectParticle(state,contours,run_nr, timedata,pix, parameters, options):
 
 	if options.printing_output:
 		if run_nr > 1:
-			save_position_images(position[best_particle],old_pos, state.rod_vel, curr_fps, expected_pos, pix, frame_nr=run_nr, particle_nr=best_particle)
+			save_position_images(position[best_particle],old_pos, state.rod_vel, curr_fps, expected_pos, pix, frame_nr=run_nr, particle_nr=best_particle, parameters=parameters)
 #			pix_point = save_point_image(expected_pos, pix, "expected", (0,0,255), run_nr, save=False)
 #			pix_point = save_point_image(old_pos + (old_vel/curr_fps), pix_point, "no_correction", (0,220,220), run_nr, save=False)
 #			pix_point = save_point_image(old_pos, pix_point, "old_pos", (0,255,0), run_nr, save=False, flip=True)
@@ -192,7 +191,7 @@ def DetectParticle(state,contours,run_nr, timedata,pix, parameters, options):
 		if options.printing_output and run_nr > 1:
 			for j in range(0,len(contours)):
 				if badness[j] <= least_bad[-1]: # index -1 means the last of the array and it should be sorted so the last is largest
-					save_position_images(position[j],old_pos, state.rod_vel, curr_fps, expected_pos, pix, frame_nr=run_nr, particle_nr=j)
+					save_position_images(position[j],old_pos, state	.rod_vel, curr_fps, expected_pos, pix, frame_nr=run_nr, particle_nr=j, parameters=parameters)
 #					draw = ImageDraw(pix_point)	
 #					draw.text((10,10), "Red is actual position, green is old position, dark blue is expected position and teal is constant motion"
 #					pix_point = save_point_image(old_pos + (old_vel/curr_fps), pix_point, "no_correction", (0,220,220), run_nr, save=False)

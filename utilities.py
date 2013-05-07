@@ -142,14 +142,59 @@ def get_filename(old_filename):
 			name_is_taken = True
 			print "we are currently trying the name ", filename
 			if filename[-5].isdigit():
-				new_filename = filename[:-5] + str(int(filename[-5]) + 1) + filename[-4:]
+				# We have an already numbered file name. Let's find out how long the number is
+				file_len 		= len(filename) - 4 # we exlude the .txt part
+				num_len 		= 0
+				
+				while filename[file_len - num_len-1: file_len].isdigit():
+					num_len +=1
+				num 			= filename[file_len - num_len: file_len] # The numeric part of the filename
+				print "num is ", num
+				
+				file_str 		= filename[:file_len - num_len]			 # The "real" name of the file
+				new_filename 	= file_str + str(int(num) + 1) + filename[-4:]		
 			else:
 				new_filename = filename[:-4] + "0" + filename[-4:]
 			filename = new_filename		
 			print old_filename, " already exists, trying to write to file ", new_filename , " instead"
-		except IOError as ioe:			
+		except IOError as ioe:
 			name_is_taken = False
 	return filename
+	
+def calc_std_dev_bench():
+	b_file = open("Metadata/benchmarks.txt", 'r')
+	
+	# Read the first line that contains the headline and discar
+	crap_line = b_file.readline()      
+	
+	# initiate a 2-D array to hold all the data
+	data = [[],[],[],[],[],[]]
+	
+	# Read lines one by one
+	for line in b_file:
+		# Split the line
+		split_line = line.split()
+		
+		# Then add each time to the array
+		for i in range(0,len(data)):
+			data[i].append(float(split_line[i]))
+	
+	# Initiate the arrays holding the results
+	means = [0]*len(data)
+	std_devs = [0]*len(data)
+	
+	# For each 
+	for i in range(0,len(means)):
+		means[i] = sum(data[i])
+		means[i] /= len(data[i])
+		for j in range(0,len(data[i])):
+			std_devs[i] += 	(data[i][j] - means[i])**2
+		std_devs[i] /= len(data[i]) - 1
+		std_devs[i] = np.sqrt(std_devs[i])
+	print means
+	print std_devs
+
+#calc_std_dev_bench()
 #img = Image.open("C:/testing.png")
 #text		= ["Red is actual position", "green is old position", "dark blue is expected position", "teal is constant motion"]
 #add_legend(img, text)

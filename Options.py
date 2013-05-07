@@ -89,8 +89,9 @@ class DetectorState:
 #		self.extra_saving_file = open(get_filename(saving_directory + "position_tracking.txt"), 'w')
 		self.pos_approx		= 0
 		self.pump 		 	= PumpController()
+		self.step_vel 		= 0
 		
-	def update(self, best_contour_nr, contours,  positions, parameters, frame_nr, timedata):
+	def update(self, best_contour_nr, contours,  positions, parameters, frame_nr, timedata, options):
 		if best_contour_nr == -1 or best_contour_nr == -2:   # DetectParticle will return -1 if no particle larger than -10 was found
 			print "We have been too picky, or the edges etc were bad",  "the number of contours is " ,len(contours)
 			self.pos_approx = self.old_pos + (self.rod_vel + self.corr_vec)
@@ -111,7 +112,7 @@ class DetectorState:
 			if self.counter > parameters.max_misses:
 				StopAxes()
 				print "Contour not found in ", parameters.max_misses, " frames, program exiting"
-				self.shut_down()
+				self.shut_down(options)
 				exit()
 			timedata.iteration_end = time.clock()
 			return 
@@ -188,9 +189,12 @@ class DetectorState:
 #				start_direction = going_right
 #				corr_vec[0] -= step_vel[0]*0.1
 #				print "we are adding reverse flow bonus to corr vel "
+			print "step_vel before correction is ", self.step_vel
 			self.going_right = ModifyStepVelocity(self, moving, parameters)
+			print "step_vel after correction is ", self.step_vel, " and corr_vec is ", self.corr_vec
+
 #			print "corr_vec afterwards is ", corr_vec
-			self.step_vel += self.corr_vec
+			#self.step_vel += self.corr_vec # This should already be done
 		else:
 			if current_frame==1:
 				oldTime     = time.clock()
@@ -217,7 +221,7 @@ class DetectorState:
 		self.reverse_cooldown += 1
 	
 	# Closes all connections and files and shuts down.
-	def shut_down(options):
+	def shut_down(self, options):
 		TerminateStepConnection(options.starting_left)
 		self.pump.CloseConnection()
 		return
