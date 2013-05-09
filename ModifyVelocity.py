@@ -15,6 +15,7 @@ def ModifyStepVelocity(state, moving, parameters):
 	if moving:
 #		print "step_vel is ", step_vel, "correction vec is ", correction_vec
 		new_velocity = state.step_vel + state.corr_vec
+		print "the correction vector we get in is ", state.corr_vec , " relative to the current step vel which is ", state.step_vel
 #		print  "we set a new speed, the correction vector was ", correction_vec
 		##### THIS FIXES VERTICAL MOVEMENT. HERE IS THE MATH TO MAKE IT UNDERSTANDABLE
 		##    y_v/x_v = y_dir/x_dir => y_v/x_v*x_dir = y_dir 
@@ -34,11 +35,14 @@ def ModifyStepVelocity(state, moving, parameters):
 		new_velocity = state.step_vel.copy()
 		print "we did not set a new speed"
 		return state.going_right
+	state.step_vel = new_velocity.copy()
 	## The step engine sets the speed to "vel fac" times the speed we tell it to, so we have to companesate for this
-	new_velocity *= parameters.vel_fac
+	print " new_vel before vel fac is ", new_velocity
+	new_velocity /= state.vel_fac
+	print " and new vel after vel fac is ", new_velocity
 	## There is some inherant error in the speed setting which causes the velocity to be different
 	new_velocity /= state.speed_error
-	state.step_vel = new_velocity
+	print " and new vel after speed error is ", new_velocity
 	SetSpeed(new_velocity[0],new_velocity[1], 0, 0, print_error=True)
 	move_time = clock() - t0
 	return state.going_right

@@ -8,21 +8,23 @@ def GetAverageImage(options) :
 #	Set up where our averaging should start
 	if options.starting_left:
 		start_x = 0
+		iter_step = -0.5
 	else:
 		start_x = -35
+		iter_step = 0.5
 	
 	ConnectSimple(1, "COM4", 9600, 0)
 	SetJoystickOff() #   
 	SetVelocity(30.0,30.0,30.0,30.0, max_vel=30)
 	MoveToAbsolutePosition(start_x,0,0,0,1) ## We assume that we are at the left inlet
 
-	iter_step = 0.5
+
 	aver_ims = []
 	averages  = 40
 	
 	## THIS IS NOT SO NICE BECAUSE WE DON'T WANT TO DEFINE CONSTANTS AT SEVERAL PLACES
 	x,y				= 1295, 105 				# The x,y coordinates of the top left corner of what we want to crop
-	width, height 	= 540, 340
+	width, height 	= 540, 400
 	box 			= (x , y, x+width, y+height)    # The bounding box for our cropping
 
 	

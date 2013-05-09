@@ -13,7 +13,7 @@ from ModifyVelocity import *
 class DetectorOptions:
 	def __init__(self,):
 		self.printing_output 	= True
-		self.starting_left   	= False
+		self.starting_left   	= True
 		self.needs_average 		= False
 		self.needs_calibrate 	= False
 		self.testing_disconnected= False
@@ -41,7 +41,7 @@ class DetectorParameters:
 				#~ self.width, self.height = 365, 275
 
 		self.x,self.y			= 1295, 105 				# The x,y coordinates of the top left corner of what we want to crop
-		self.width, self.height = 540, 340
+		self.width, self.height = 540, 400
 		self.size 				= (self.width, self.height)         # The resultant size of our image after resizing
 		self.middle 			= [self.size[0]/2, self.size[1]/2]  # We want our particle to be close to the middle.
 		self.box 				= (self.x,self.y,self.x+self.width,self.y+self.height)    # The bounding box for our cropping
@@ -208,6 +208,11 @@ class DetectorState:
 		#stepfile.write("\t" + to_str(self.corr_vec) + "\t" + to_str(self.step_vel) + "\n")
 	
 	def check_pump(self):
+		print "checking pump"
+		if self.currentPosition[0] < -25:
+			print "we are in rightern reversing territory, flowing right is ", self.flowing_right
+		elif self.currentPosition[0] > -10:
+			print "we are in leftern reversing territory, flowing right is ", self.flowing_right
 		if (self.currentPosition[0] < -25 and self.flowing_right) or (self.currentPosition[0] > -10 and not self.flowing_right):  #These numbers have to be tweaked obviously
 			if self.reverse_cooldown > 100:
 				self.reverse_cooldown = 0

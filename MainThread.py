@@ -119,6 +119,7 @@ class MainThread(threading.Thread):
 				im.save("Images/cropped image" + str(i) + ".jpg")
 			if self.image_to_show == "original":
 				self.im_list.put(im)
+			timedata.image_end 	= time.clock()
 			
 				#### PERFORM EDGE DETECTION AND CONTOUR DETECTION 
 			timedata.contour_start 	= time.clock()
@@ -131,10 +132,15 @@ class MainThread(threading.Thread):
 			# To save space we could possibly merge contours with state? It seems a bit weird either way...
 			## Updates the state based on the particle we have, or have not, found.
 			state.update(best_contour_nr, contours, positions, self.parameters, i, timedata, options)
-
+			if best_contour_nr < 0:
+				continue
 			## If we are printing output we save a picture of the chosen contour
 			if options.printing_output:
-				cv2.drawContours(pix,[contours[best_contour_nr]],-1,(0,255,0),3)
+				try:
+					cv2.drawContours(pix,[contours[best_contour_nr]],-1,(0,255,0),3)
+				except IndexError as ie:
+					print "contours is ", contours, " and the best contour number is ", best_contour_nr
+					raise
 				im = Image.fromarray(pix)
 				if self.image_to_show == "main_contour":
 					self.im_list.put(im)
@@ -148,7 +154,7 @@ class MainThread(threading.Thread):
 
 		#### 	MEASURE THE POSITION AND VELOCITY OF THE STEP ENGINE
 			if not options.testing_disconnected:
-				currentPosition = SaveStepPos(options, timedata)
+				state.currentPosition = SaveStepPos(options, timedata)
 
 		## I HAVE CHAGED SAVE STEP POS NEED TO CHANGE THE DEFINITION		
 				state.update_correction_vector(state, self.parameters, options, current_frame=j)

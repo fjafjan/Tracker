@@ -38,13 +38,13 @@ from PIL 	import Image
 
 # HERE WE SPECIFY PARAMETERS
 min_size 	  = 10		# The minimum size we consider
-max_size      = 200 	# The maximum size we consider
+max_size      = 250 	# The maximum size we consider
 move_weight   = 5 		# The weight we give to the particle not moving relative to the camera
 momentum      = 100    	# The weight we give to the particle not changing speed
 dist_weight   = 8     	# The weight we give tot he particle not being close to the center
 thin_weight   = 300 	# The weight we give to the particle being thin
 nr_of_bad     = 5   	# This is the number of particles we will check the roundness of.
-max_acc 	  = 50
+max_acc 	  = 70
 
 ## I should move this.. let's do it now
 ## Initializations
@@ -64,7 +64,9 @@ def DetectParticle(state,contours,run_nr, timedata,pix, parameters, options):
 
 	least_bad = [100000000]*nr_of_bad
 	sizes = array([]) ## We then append this array to the big array
-	badness, velocity, position = zeros(len(contours)), zeros((len(contours),2)), zeros((len(contours),2))
+	badness =  zeros(len(contours))
+	velocity = zeros((len(contours), 2))
+	position = zeros((len(contours), 2))
 	accelerations = zeros(len(contours))
 	found_particle = False
 	
@@ -88,6 +90,9 @@ def DetectParticle(state,contours,run_nr, timedata,pix, parameters, options):
 		tmp_pos = np.sum(contours[j], axis=0)          # Calculate position
 		position[j] = tmp_pos[0]/len(contours[j])      # Normalize, the pos[0] is because of an extra layer of nothing
 		position[j][1] = (parameters.middle[1]*2)-position[j][1]  # Makes the y-axis positive, ie bottom up and not the opposite
+		if (position[j] == [0,0]).all():
+			print "This is the weird bug where the position becomes 0... "
+			print "tmp_pos was ", tmp_pos
 		## Add badness to particles for their acceleration or if they are too close to the center
 		## Note we can't consider the speed/acceleration the first frame, as we have no reference point. 
 		## Instead we then consider it's distance from the center as the primary attribute

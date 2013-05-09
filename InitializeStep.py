@@ -72,10 +72,12 @@ def InitializeStepEngine(order_list, image_list, options, parameters, timedata):
 		im = ImageGrab.grab(parameters.box)
 		contours, pix  	= GetContours(im, dirt_arr, 210, printing_output=False, iteration=0)
 		best_contour_nr, positions = DetectParticle(state,contours,0, timedata,pix, parameters, options) # i is the current nr of runs
+		if best_contour_nr < 0:
+			continue
 		cv2.drawContours(pix,[contours[best_contour_nr]],-1,(0,255,0),3)
 		im = Image.fromarray(pix)
 		image_list.put(im)
-		sleep(1./parameters.fps_max)
+		sleep(1.5/parameters.fps_max)
 	
 	##	 	We find the velocity we were going at
 	vel_approx = CalcVelocity(0.1)

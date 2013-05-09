@@ -48,7 +48,7 @@ class PumpThread(threading.Thread):
 	def run(self):
 		sleep(1)
 		print "I am now about to star slowing down"
-		self.slow_reverse(3,1,10)
+		self.slow_reverse(1.5,0.5,10)
 		# End of life? Seemingly
 	def slow_reverse(self ,fast_rate, slow_rate, pause_time):
 		self.pump.StopFlow()
