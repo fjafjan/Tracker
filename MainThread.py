@@ -23,6 +23,7 @@ from FindCorrectionVector import FindCorrectionVector
 from utilities import sum_of, setpriority, save_image_as, to_str
 from TimeData import *
 from Options import DetectorOptions, DetectorParameters, DetectorState
+from Kalman import Kalman
 #from ImageWindow import Viewer
 
 ## Standard Library packages
@@ -30,6 +31,7 @@ import os
 import time
 #import win32api
 import threading
+import thread
 import Queue
 from sys import exit
 #setpriority()
@@ -45,6 +47,17 @@ class MainThread(threading.Thread):
 		self.image_to_show = "main_contour"	
 		self.options = options
 
+
+## THINGS FOR KALMAN FILTER
+## EXPERIMENTAL
+	#~ dt = 1/fps_max
+	#~ A = np.mat([[1,dt,0,0],[0,1,0,0],[0,0,1,dt],[0,0,0,1]])
+	#~ B = np.mat([[dt,0,0,0],[0,1,0,0],[0,0,dt,0],[0,0,0,1]])
+	#~ H = np.identity(4)#*step_2_pixel # Which should we choose here?...
+	#~ P = np.identity(4) # This changes over time so we are not too worried.
+	#~ Q = np.identity(4)*0.01 # We are pretty confident it our model.. maybe foolishly so!
+	#~ R = np.identity(4)*0.010  # we are a fair bit more uncertain about this...
+	#~ I = np.identity(4)
 
 	def run(self):
 		## Short explanatory text re parameters, options and state.
@@ -63,6 +76,8 @@ class MainThread(threading.Thread):
 
 		# parameters holding object
 		self.parameters  	= DetectorParameters() 
+
+		self.kalman = Kalman(fps_max = 10, going_right = True, middle = self.parameters.middle)
 
 		# option holding object
 		options 		= self.options
@@ -132,6 +147,11 @@ class MainThread(threading.Thread):
 			# To save space we could possibly merge contours with state? It seems a bit weird either way...
 			## Updates the state based on the particle we have, or have not, found.
 			state.update(best_contour_nr, contours, positions, self.parameters, i, timedata, options)
+			self.kalman.predict(state)
+			self.kalman.update(state)
+			print " the found position we think was ", state.pos_approx
+			print "Kalman predicted the position to be ", [self.kalman.x_pred[0], self.kalman.x_pred[2]] 
+			print "Kalman thinks our actual position is ", [self.kalman.x_est[0], self.kalman.x_est[2]], 
 			if best_contour_nr < 0:
 				continue
 			## If we are printing output we save a picture of the chosen contour
@@ -158,6 +178,7 @@ class MainThread(threading.Thread):
 
 		## I HAVE CHAGED SAVE STEP POS NEED TO CHANGE THE DEFINITION		
 				state.update_correction_vector(state, self.parameters, options, current_frame=j)
+				state.corr_vec *= 0
 				# this should probably also be a state operation.. it would really finish cutting down on the main loop!
 
 		####	AND THEN DO THE REQUIRED CORRECTIONS		
@@ -194,9 +215,9 @@ class MainThread(threading.Thread):
 				self.state.pump.CloseConnection()
 				
 				## Should close various files as well? I think opening them next time will solve that.
-				
-				import sys
-				sys.exit()				
+				thread.exit()
+#				import sys
+#				sys.exit()				
 			image_commands = ["nothing", "main_contour", "original", "all_contours"]
 			if order in image_commands:
 				self.image_to_show = order

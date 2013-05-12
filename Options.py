@@ -81,6 +81,7 @@ class DetectorState:
 		self.particle_size 	= 0.							
 		self.currentPosition= [0,0]
 		self.rod_vel 		= 0
+		self.simple_vel 	= 0
 		self.corr_vec 		= zeros(2)
 		self.reverse_cooldown= 100000
 		self.break_force	= 0
@@ -108,8 +109,8 @@ class DetectorState:
 
 			self.old_pos = self.pos_approx
 	#		old_pos = [pos_approx[0], average_y]
-			self.counter += 1
-			if self.counter > parameters.max_misses:
+			self.fail_counter += 1
+			if self.fail_counter > parameters.max_misses:
 				StopAxes()
 				print "Contour not found in ", parameters.max_misses, " frames, program exiting"
 				self.shut_down(options)
@@ -117,7 +118,7 @@ class DetectorState:
 			timedata.iteration_end = time.clock()
 			return 
 			# tell outer program to continue
-		self.counter = 0
+		self.fail_counter = 0
 
 		self.pos_approx = positions[best_contour_nr]
 		self.last_y.insert(0,self.pos_approx[1])

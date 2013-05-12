@@ -76,9 +76,10 @@ def MoveToAbsolutePosition(X, Y, Z, A, wait, print_error=False):
 def Disconnect(print_error=False):
 	disconnect = Step4['LS_Disconnect']
 	error_code = ctypes.c_int32(-1)
+	error_code = disconnect()
 	if error_code != 0:
 		print "Our error code for disconnecting was ", error_code
-	error_code = disconnect()
+	
 
 def SetJoystickOn(pos_count=True, encoder=True, print_error=False):
 	pos_count_c = ctypes.c_int(pos_count)
@@ -225,6 +226,8 @@ def TerminateStepConnection(starting_left):
 	SetJoystickOn(True, True)
 	Disconnect()
 
+#def CloseFiles():
+	
 ## Okay so I have done some experiments. Conclusions from today from what I have learnt:
 
 # 1) Always start with the connect command, i use Connect Simple with mode 1

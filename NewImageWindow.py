@@ -137,6 +137,8 @@ class Viewer:
 	def end_tracking(self):
 		self.order_queue.put("stop")
 		self.end_image_update = True
+		self.tracker.join()
+		print "The state of the thread is ", self.tracker.isAlive()
 		print "WE ARE ENDING NOW I HOPE!!!"
 		
 	def set_starting_pos(self, text):
