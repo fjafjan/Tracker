@@ -83,10 +83,10 @@ class MainThread(threading.Thread):
 		options 		= self.options
 		options.testing_disconnected= False
 		options.printing_output 	= True
-		options.starting_left   	= True
-		options.needs_average 		= False
+#		options.starting_left   	= True
+#		options.needs_average 		= False
 		options.saving_directory    = "E:/staffana/Feb 26/"
-
+		print "starting left is ", options.starting_left
 		# state holding object. Could be replaced if we implement a Kalman filter
 		#self.state			= DetectorState(self.parameters, options)
 				
@@ -139,7 +139,7 @@ class MainThread(threading.Thread):
 				#### PERFORM EDGE DETECTION AND CONTOUR DETECTION 
 			timedata.contour_start 	= time.clock()
 			
-			contours, pix  			= GetContours(im, aver_im, 210, options.printing_output, i)
+			contours, pix  			= GetContours(im, aver_im, 190, options.printing_output, i)
 			timedata.contour_end	= time.clock()
 			
 					
@@ -147,11 +147,11 @@ class MainThread(threading.Thread):
 			# To save space we could possibly merge contours with state? It seems a bit weird either way...
 			## Updates the state based on the particle we have, or have not, found.
 			state.update(best_contour_nr, contours, positions, self.parameters, i, timedata, options)
-			self.kalman.predict(state)
+			self.kalman.predict(state, self.parameters.step_2_pixel)
 			self.kalman.update(state)
 			print " the found position we think was ", state.pos_approx
-			print "Kalman predicted the position to be ", [self.kalman.x_pred[0], self.kalman.x_pred[2]] 
-			print "Kalman thinks our actual position is ", [self.kalman.x_est[0], self.kalman.x_est[2]], 
+			print "Kalman predicted the position to be ", [self.kalman.x_pred.item(0), self.kalman.x_pred.item(2)] 
+			print "Kalman thinks our actual position is ", [self.kalman.x_est.item(0), self.kalman.x_est.item(2)], 
 			if best_contour_nr < 0:
 				continue
 			## If we are printing output we save a picture of the chosen contour

@@ -21,8 +21,6 @@ class Kalman():
 		dt 			= self.dt
 		self.control= np.mat([state.corr_vec[0]*dt,state.corr_vec[0], state.corr_vec[1]*dt, state.corr_vec[1]])
 		self.control = self.control.transpose()*step_2_pixel
-		print "A is ", self.A.shape, " x_old is ", self.x_old.shape
-		print "B is ", self.B.shape, " control is ", self.control.shape
 		self.x_pred = self.A*self.x_old + self.B*self.control
 		self.P_pred = self.A*self.P*self.A.transpose() + self.Q
 	

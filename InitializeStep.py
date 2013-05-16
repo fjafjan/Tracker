@@ -71,7 +71,7 @@ def InitializeStepEngine(order_list, image_list, options, parameters, timedata):
 				break
 		im = ImageGrab.grab(parameters.box)
 		contours, pix  	= GetContours(im, dirt_arr, 210, printing_output=False, iteration=0)
-		best_contour_nr, positions = DetectParticle(state,contours,0, timedata,pix, parameters, options) # i is the current nr of runs
+		best_contour_nr, positions = DetectParticle(state,contours,0, timedata,pix, parameters, options, initialize=True) # i is the current nr of runs
 		if best_contour_nr < 0:
 			continue
 		cv2.drawContours(pix,[contours[best_contour_nr]],-1,(0,255,0),3)

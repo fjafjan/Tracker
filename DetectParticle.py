@@ -51,7 +51,7 @@ max_acc 	  = 70
 
 ## Let's replace fps_max with out time_data knowledge!
 ## CORRECTION VEC SHOULD BE = (corr_vec-break_force)*step_2_pixel
-def DetectParticle(state,contours,run_nr, timedata,pix, parameters, options):
+def DetectParticle(state,contours,run_nr, timedata,pix, parameters, options, initialize = False):
 	timedata.detection_start = clock()
 
 	# some ugly initializations
@@ -124,7 +124,8 @@ def DetectParticle(state,contours,run_nr, timedata,pix, parameters, options):
 	options.badness_file.write("\n\n" + "Frame " + str(run_nr) + "\n")
 	least_bad_added = least_bad[:]
 
-	print "\n"
+	if not initialize:
+		print "\n"
 	## We add badness to particles that are not thin. 
 	for j in range(0,len(contours)):
 		# index -1 means the last of the array and it should be sorted so the last is largest
@@ -142,7 +143,7 @@ def DetectParticle(state,contours,run_nr, timedata,pix, parameters, options):
 			badness[j] += thinness
 			least_bad_added[rank] += thinness
 			#~ print "2) we added the particle ", j, " with position ", position[j]
-			if options.printing_output:
+			if options.printing_output and initialize == False:
 				pix_point = add_point_to_image(position[j], pix, parameters.middle, color="Red", size=3) 
 				save_contour_image(j, contours, pix_point, rank, run_nr)
 			#~ print "3) we added the particle ", j, " with position ", position[j]
@@ -151,7 +152,8 @@ def DetectParticle(state,contours,run_nr, timedata,pix, parameters, options):
 			badness[j] +=5000000 # We don't want anyone out of the top N.
 	least_bad = least_bad_added
 	least_bad.sort()
-	print "\n"
+	if not initialize:
+		print "\n"
 
 	for rank in range(0, nr_of_bad):
 		###### MOST LIKELY CULPRIT ######
@@ -170,7 +172,7 @@ def DetectParticle(state,contours,run_nr, timedata,pix, parameters, options):
 
 	best_particle = argmin(badness)
 
-	if options.printing_output:
+	if options.printing_output and initialize == False:
 		if run_nr > 1:
 			save_position_images(position[best_particle],old_pos, state.rod_vel, curr_fps, expected_pos, pix, frame_nr=run_nr, particle_nr=best_particle, parameters=parameters)
 #			pix_point = save_point_image(expected_pos, pix, "expected", (0,0,255), run_nr, save=False)
@@ -190,10 +192,14 @@ def DetectParticle(state,contours,run_nr, timedata,pix, parameters, options):
 	if position[best_particle][0] == 0 and position[best_particle][1] == 0:
 		print "\n SOMETHING HAS GONE WRONG WE ARE AT POSITION 0 0!!! :(:(:( \n\n"
 	pass
-#	print "max acc is compared to ", sqrt(accelerations[best_particle])/momentum*100, " instead of using expected_pos which would give us ", norm(expected_pos - position[best_particle])
+	
+	if state.reverse_cooldown < 30*parameters.fps_max:
+		max_acc = 120
+	else:
+		max_acc = 70
 	if sqrt(accelerations[best_particle])/momentum*100 > max_acc:
 		print "we excluded particles for accelerating too much "
-		if options.printing_output and run_nr > 1:
+		if options.printing_output and run_nr > 1 and initialize == False:
 			for j in range(0,len(contours)):
 				if badness[j] <= least_bad[-1]: # index -1 means the last of the array and it should be sorted so the last is largest
 					save_position_images(position[j],old_pos, state	.rod_vel, curr_fps, expected_pos, pix, frame_nr=run_nr, particle_nr=j, parameters=parameters)

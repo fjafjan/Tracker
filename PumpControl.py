@@ -48,28 +48,34 @@ class PumpThread(threading.Thread):
 	def run(self):
 		sleep(1)
 		print "I am now about to star slowing down"
-		self.slow_reverse(1.5,0.5,10)
+		self.slow_reverse([2.0, 1.0],10)
 		# End of life? Seemingly
-	def slow_reverse(self ,fast_rate, slow_rate, pause_time):
+	def slow_reverse(self , flow_rates, pause_time):
+		for rate in flow_rates[1:]:
+			self.pump.StopFlow()
+			print " Setting flow rate to ", rate
+			self.pump.SetRate(rate)
+			sleep(0.1)
+			self.pump.StartFlow()
+			print "Starting with slow rate"
+			sleep(pause_time)
+		## Do nothing for abit
 		self.pump.StopFlow()
-		print " Setting slow rate"
-		self.pump.SetRate(slow_rate)
-		sleep(0.1)
-		self.pump.StartFlow()
-		print "Starting with slow rate"
+		print "stopping completely for a bit"
 		sleep(pause_time)
-		self.pump.StopFlow()
-		print "Stopping completely for a bit"
-		sleep(pause_time)
+### NOte review this
 		self.pump.ReverseFlow()
 		self.pump.StartFlow()
-		print "Starting with slow reversed flow"
-		sleep(pause_time)
-		self.pump.StopFlow()
-		self.pump.SetRate(fast_rate)
-		print "Starting again with fast rate"
-		sleep(0.1)
-		self.pump.StartFlow()
+		for rate in reversed(flow_rates[:-1]):
+			print "Starting with slow reversed flow"
+			sleep(pause_time)
+			self.pump.StopFlow()
+			self.pump.SetRate(rate)
+			print "Starting again with fast rate"
+			sleep(0.1)
+			self.pump.StartFlow()
+
+
 
 ## Unit test function
 
@@ -77,6 +83,8 @@ class PumpThread(threading.Thread):
 #~ p = PumpThread(pump)
 #~ p.setDaemon(False)
 #~ p.start()
+
+
 #~ for i in range(1,10):
 	#~ sleep(1)
 	#~ print "proc ", i, " has started"
@@ -99,3 +107,6 @@ class PumpThread(threading.Thread):
 #pi.xmit('DIR RVS')
 #pi = PumpInterface(port=5)
 # THIS WORKS THIS IS ALL I NEED
+
+
+

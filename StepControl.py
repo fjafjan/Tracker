@@ -197,6 +197,8 @@ def	SaveStepPos(options, timedata, extra_file=-1):
 	t0 = clock()
 	currentPosition = GetPosition()
 	currentPosition = array([currentPosition[0], currentPosition[1]])
+	print "current position is ", currentPosition, type(currentPosition)
+
 	#print "getting pos took ", clock() - t0
 	t_obj = localtime()
 	t_ms  = time_now() - floor(time_now())

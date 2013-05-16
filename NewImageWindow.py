@@ -126,6 +126,7 @@ class Viewer:
 		im_list 	= self.image_queue
 		order_list 	= self.order_queue
 		queues		= im_list, order_list
+		print "we are telling the main thread that starting left is ", self.options.starting_left
 		self.tracker = MainThread(queues, self.options)
 		self.tracker.start()
 		self.update_image()		
@@ -147,6 +148,7 @@ class Viewer:
 			self.options.starting_left == True
 		elif text == "right":
 			self.options.starting_left == False
+			print "we set starting position to right I hope...."
 		else:
 			print text
 			print "ERROR TRYING TO SET STARTING POSITION TO SOMETHINGOTHER THAN LEFT OR RIGHT!!!"

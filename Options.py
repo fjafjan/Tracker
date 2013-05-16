@@ -168,6 +168,8 @@ class DetectorState:
 	
 	def update_correction_vector(self, state, parameters, options, current_frame):
 		# Unless it's an even second or we are about to lose the particle do we try to correct:
+		emergency = isNearEdge(self,parameters) or isGoingFast(self, parameters) 
+		emergency = emergency or state.reverse_cooldown < 5*parameters.fps_max
 		if current_frame%parameters.correction_interval == 0 or isNearEdge(self, parameters) or isGoingFast(self,parameters): 
 			target_pos = GetTargetPos(self, parameters)
 			# Where we want our particle to be depends on if are close to turning or not
@@ -182,6 +184,7 @@ class DetectorState:
 				print "\n We are adjusting for breaking \n "
 				self.reverse_counter += 1
 				self.break_force = [self.step_vel[0]*0.01, 0]
+				print "the break force is ", self.break_force, " relative to the corr_vec which is ", self.corr_vec
 #				going_right = ModifyStepVelocity(step_vel, going_right, corr_vec+break_force, moving, speed_error, vel_fac)
 				if self.reverse_counter > parameters.fps_max*2.5:
 					self.reversed_flow = False
