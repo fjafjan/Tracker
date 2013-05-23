@@ -25,11 +25,15 @@ class Kalman():
 		self.P_pred = self.A*self.P*self.A.transpose() + self.Q
 	
 	def update(self, state):  ## I am pretty sure this uses wikipedia notations
-		x_meas = [state.pos_approx[0], state.simple_vel[0],state.pos_approx[1], state.simple_vel[1]]
-		x_meas = np.array(x_meas).transpose()
-		self.y = x_meas - (self.H*self.x_pred)
-		self.S = self.H * self.P_pred * self.H.transpose()  + self.R
-		self.K = self.P_pred*self.H.transpose()*np.linalg.inv(self.S)
-		self.x_est = self.x_pred + (self.K*self.y)
-		self.P_est = (self.I - self.K*self.H)*self.P_pred
+		try:
+			x_meas = [state.pos_approx[0], state.simple_vel[0],state.pos_approx[1], state.simple_vel[1]]
+			x_meas = np.array(x_meas).transpose()
+			self.y = x_meas - (self.H*self.x_pred)
+			self.S = self.H * self.P_pred * self.H.transpose()  + self.R
+			self.K = self.P_pred*self.H.transpose()*np.linalg.inv(self.S)
+			self.x_est = self.x_pred + (self.K*self.y)
+			self.P_est = (self.I - self.K*self.H)*self.P_pred
+		except TypeError:
+			print "pos approx is ", state.pos_approx, "simple vel is ", state.simple_vel
+			raise # Only for now, I want to see what the hell is happenin first
 		

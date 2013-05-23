@@ -78,7 +78,7 @@ class PumpThread(threading.Thread):
 
 
 ## Unit test function
-
+#~ 
 #~ pump = PumpController()
 #~ p = PumpThread(pump)
 #~ p.setDaemon(False)

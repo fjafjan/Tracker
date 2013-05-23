@@ -35,6 +35,7 @@ class DetectorParameters:
 		self.correction_interval= 1*self.fps_max	 		# How often we correct the speed. 
 		self.max_misses			= 5
 		self.fast_speed 		= 55 # This is some number I have decreed!
+		self.adjusted_speed 	= 20 # We don't want it moving at all in the wrong direction really. 
 		self.vel_fac 			= 1/10.
 
 		#~ self.x,self.y			= 1490, 205 				# The x,y coordinates of the top left corner of what we want to crop
@@ -73,7 +74,9 @@ class DetectorState:
 ## I	NITIALIZATIONS									# Some ugly initializations
 		self.old_pos 		= parameters.middle      					
 		self.average_y 		= parameters.middle[1]		# The first frame it makes sense that conceptually we were previously "in the middle"
-		self.last_y			= [0]*5						# We look at the five last values
+		self.average_vel	= array([0,0])
+		self.last_y			= [0]*5						# We look at the five last values of our y position
+		self.last_vel 		= [0]*3						# And the last three values rod movements.
 		self.allsizes 		= array([])             	# Not used currently, could be nice in the future?	
 		self.going_right 	= options.starting_left		# We assume that we start at the left inlet.
 		self.flowing_right	= options.starting_left		# Presumably, the direction of the flow is the same as the particle...
@@ -154,6 +157,10 @@ class DetectorState:
 #			print "\n Our old approximation is ", self.simple_vel
 #			print " and the correction vector contrib is ",correction_term
 #			print "our rod_vel is thus ", self.rod_vel, " and ur corr_vec is ", self.corr_vec, "\n"
+		self.last_vel.insert(0, self.rod_vel)
+		self.last_vel.pop()
+		self.average_rod_vel = sum(self.last_vel)/min(len(self.last_vel),frame_nr)
+		print "average rod velocity is ", self.average_rod_vel
 		self.old_pos = self.pos_approx
 	#	old_pos = [pos_approx[0], average_y]
 

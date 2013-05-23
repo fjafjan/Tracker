@@ -1,0 +1,7 @@
+1) Chose wrong contour  II
+
+2) Could not catch particle at turn   III
+
+3) Lost contour after detecting wrong contour once II
+
+4) port crashed? I

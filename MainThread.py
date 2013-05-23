@@ -37,7 +37,7 @@ from sys import exit
 #setpriority()
 
 class MainThread(threading.Thread):
-	def __init__(self, queues, options):
+	def __init__(self, queues, options, parameters):
 		threading.Thread.__init__(self)
 		im_list, order_list = queues
 		self.im_list = im_list
@@ -46,6 +46,7 @@ class MainThread(threading.Thread):
 		self.order_list = order_list
 		self.image_to_show = "main_contour"	
 		self.options = options
+		self.parameters = parameters
 
 
 ## THINGS FOR KALMAN FILTER
@@ -75,8 +76,6 @@ class MainThread(threading.Thread):
 
 
 		# parameters holding object
-		self.parameters  	= DetectorParameters() 
-
 		self.kalman = Kalman(fps_max = 10, going_right = True, middle = self.parameters.middle)
 
 		# option holding object
@@ -102,8 +101,6 @@ class MainThread(threading.Thread):
 			#~ state.step_vel, aver_im, state.speed_error, state.vel_fac, state.going_right = outputs
 
 			state = self.state # I think this is safe. 
-			## Since right means minus on the step engine, we simply check if our velocity is negative or not
-			state.going_right = state.step_vel < 0
 			### TRY TO OPEN A SEPARATE WINDOW WHERE THE USER CAN PRESS STOP MAYBE BUT FIRST JUST SHOW IT
 		else:
 #			dirt_im = Image.open("Images/Averaging/average_image.jpg")

@@ -21,6 +21,7 @@ class Viewer:
 		# Show the first image
 		im = im_queue.get()
 		self.options = DetectorOptions()
+		self.parameters = DetectorParameters()
 
 
 # NOTE TO SELF: Change this. Most likely give it one of the "gtinker string".
@@ -32,6 +33,97 @@ class Viewer:
 		self.lbl = Label(master, image=self.tkimage)
 		self.lbl.pack(side='top')
 		
+		# Sets up the GUI stuff. 
+		self.setup_gui(master)
+		## Save images
+
+	def find_particle(self):
+		im_list 	= self.image_queue
+		order_list 	= self.order_queue
+		queues		= im_list, order_list
+		print "we are telling the main thread that starting left is ", self.options.starting_left
+		self.tracker = MainThread(queues, self.options, self.parameters)
+		self.tracker.start()
+		self.update_image()		
+	
+	def start_tracking(self):
+		self.order_queue.put("start_tracking")
+		## I think this is all it needs to do?
+
+	def end_tracking(self):
+		self.order_queue.put("stop")
+		self.end_image_update = True
+		self.tracker.join()
+		print "The state of the thread is ", self.tracker.isAlive()
+		print "WE ARE ENDING NOW I HOPE!!!"
+		
+	def set_starting_pos(self, text):
+		## Ideally this should also move the actual step engine. But currently this is not supported
+		if text == "left":
+			self.options.starting_left == True	
+		elif text == "right":
+			self.options.starting_left == False
+			print "we set starting position to right I hope...."
+		else:
+			print text
+			print "ERROR TRYING TO SET STARTING POSITION TO SOMETHINGOTHER THAN LEFT OR RIGHT!!!"
+
+
+	
+	def update_image(self):
+		if self.image_queue.empty():
+			#print "\n there were no images :( \n"6
+			pass
+		else: 
+			im = self.image_queue.get()
+#			print "image should be updated", im, type(im)
+			self.tkimage.paste(im)
+		if self.end_image_update:
+			print "IT SHOULD EXIT NOW!!!"
+			self.end_image_update = False
+			return
+		self.top.after(100, self.update_image)
+
+	def show_queue(self, command):
+		valid_commands = ["nothing", "main_contour", "original", "all_contours"]
+		if command in valid_commands:
+			if command == "nothing":
+				self.show_black()			
+			elif self.paused:
+				self.update_image()
+				self.paused = False
+			self.order_queue.put(command)
+
+	def options_queue(self, command):
+		valid_commands = ["calibrate", "average", "starting_left", "starting_right"]
+		if command in valid_commands:
+			if command == "calibrate":
+				from Calibrate import Calibrate
+				Calibrate(new_calibration=True)
+			elif command == "average":
+				from GetAverageImage import GetAverageImage
+				GetAverageImage(self.options)
+				## This might be trouble as we are using a variable from another thread directly instead of from a queue
+			else:
+				self.order_queue.put(command)
+#~ 
+	#~ def show_black(self):
+		#~ im = Image.new(
+		#~ self.tkimage.paste(im)
+		#~ self.end_image_update = True
+		#~ self.paused = True
+	
+
+	def set_save_directory(self):
+		 folder = tkFileDialog.askdirectory()
+		 self.direct_var.set(folder)
+		 self.options.saving_directory = folder
+		 print "folder is ", folder
+		 filename = get_filename(folder + "/position_tracking.txt")
+		 self.options.extra_file = open(filename, 'w')
+
+
+	def setup_gui(self, master):
 		main_fr = Frame(master)
 		main_fr.pack(side='top', expand=1,fill='x')		
 		
@@ -120,94 +212,6 @@ class Viewer:
 		self.direct_var.set(self.options.saving_directory)
 		entry = Entry(option_fr, textvariable=self.direct_var, width=40)
 		entry.grid(row=2, column=2, sticky="w", pady=4)
-		## Save images
-
-	def find_particle(self):
-		im_list 	= self.image_queue
-		order_list 	= self.order_queue
-		queues		= im_list, order_list
-		print "we are telling the main thread that starting left is ", self.options.starting_left
-		self.tracker = MainThread(queues, self.options)
-		self.tracker.start()
-		self.update_image()		
-	
-	def start_tracking(self):
-		self.order_queue.put("start_tracking")
-		## I think this is all it needs to do?
-
-	def end_tracking(self):
-		self.order_queue.put("stop")
-		self.end_image_update = True
-		self.tracker.join()
-		print "The state of the thread is ", self.tracker.isAlive()
-		print "WE ARE ENDING NOW I HOPE!!!"
-		
-	def set_starting_pos(self, text):
-		## Ideally this should also move the actual step engine. But currently this is not supported
-		if text == "left":
-			self.options.starting_left == True
-		elif text == "right":
-			self.options.starting_left == False
-			print "we set starting position to right I hope...."
-		else:
-			print text
-			print "ERROR TRYING TO SET STARTING POSITION TO SOMETHINGOTHER THAN LEFT OR RIGHT!!!"
-
-
-	
-	def update_image(self):
-		if self.image_queue.empty():
-			#print "\n there were no images :( \n"
-			pass
-		else: 
-			im = self.image_queue.get()
-#			print "image should be updated", im, type(im)
-			self.tkimage.paste(im)
-		if self.end_image_update:
-			print "IT SHOULD EXIT NOW!!!"
-			self.end_image_update = False
-			return
-		self.top.after(100, self.update_image)
-
-	def show_queue(self, command):
-		valid_commands = ["nothing", "main_contour", "original", "all_contours"]
-		if command in valid_commands:
-			if command == "nothing":
-				self.show_black()			
-			elif self.paused:
-				self.update_image()
-				self.paused = False
-			self.order_queue.put(command)
-
-	def options_queue(self, command):
-		valid_commands = ["calibrate", "average", "starting_left", "starting_right"]
-		if command in valid_commands:
-			if command == "calibrate":
-				from Calibrate import Calibrate
-				Calibrate(new_calibration=True)
-			elif command == "average":
-				from GetAverageImage import GetAverageImage
-				GetAverageImage(self.options)
-				## This might be trouble as we are using a variable from another thread directly instead of from a queue
-			else:
-				self.order_queue.put(command)
-
-	def show_black(self):
-		im = Image.open("no_image.jpg")
-		self.tkimage.paste(im)
-		self.end_image_update = True
-		self.paused = True
-	
-
-	def set_save_directory(self):
-		 folder = tkFileDialog.askdirectory()
-		 self.direct_var.set(folder)
-		 self.options.saving_directory = folder
-		 print "folder is ", folder
-		 filename = get_filename(folder + "/position_tracking.txt")
-		 self.options.extra_file = open(filename, 'w')
-
-
 
 
 def test_this():

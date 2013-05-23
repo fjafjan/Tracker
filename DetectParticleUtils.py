@@ -146,6 +146,14 @@ def isNearEdge(state, parameters):
 		return False
 
 def isGoingFast(state, parameters):
+	if abs(state.rod_vel[1]) > parameters.fast_speed:
+		return True
+	if state.reversed_flow:
+		print state.going_right, state.rod_vel[0] > 0
+		if state.going_right and state.rod_vel[0] > 0: # If we are turning at the right side and the rod is going to the left
+			return abs(state.rod_vel[0]) > parameters.adjusted_speed
+		elif not state.going_right and state.rod_vel[0] < 0:
+			return abs(state.rod_vel[0]) > parameters.adjusted_speed
 	return abs(state.rod_vel[0]) > parameters.fast_speed or abs(state.rod_vel[1]) > parameters.fast_speed
 	
 def GetTargetPos(state, parameters):

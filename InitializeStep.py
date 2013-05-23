@@ -86,7 +86,9 @@ def InitializeStepEngine(order_list, image_list, options, parameters, timedata):
 
 	state.step_vel = np.array([vel_approx[0],vel_approx[1]])
 	state.going_right = vel_approx[0]<0
+	state.flowing_right = vel_approx[0]<0
 	print " We think we are going right: ", state.going_right
+	print " We think we are going right: ", state.flowing_right
 
 	## 		We set the step engine to move at this speed
 	SetJoystickOff()

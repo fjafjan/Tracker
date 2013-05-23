@@ -42,7 +42,7 @@ max_size      = 250 	# The maximum size we consider
 move_weight   = 5 		# The weight we give to the particle not moving relative to the camera
 momentum      = 100    	# The weight we give to the particle not changing speed
 dist_weight   = 8     	# The weight we give tot he particle not being close to the center
-thin_weight   = 300 	# The weight we give to the particle being thin
+thin_weight   = 500 	# The weight we give to the particle being thin
 nr_of_bad     = 5   	# This is the number of particles we will check the roundness of.
 max_acc 	  = 70
 

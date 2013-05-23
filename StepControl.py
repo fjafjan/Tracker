@@ -197,7 +197,6 @@ def	SaveStepPos(options, timedata, extra_file=-1):
 	t0 = clock()
 	currentPosition = GetPosition()
 	currentPosition = array([currentPosition[0], currentPosition[1]])
-	print "current position is ", currentPosition, type(currentPosition)
 
 	#print "getting pos took ", clock() - t0
 	t_obj = localtime()
@@ -220,7 +219,8 @@ def	SaveStepPos(options, timedata, extra_file=-1):
 
 def TerminateStepConnection(starting_left):
 	StopAxes()
-	SetVelocity(3, 3, 0, 0,3)
+	vel_fac = GetVelocityFactor()
+	SetVelocity(3/vel_fac[0], 3/vel_fac[1], 0, 0,3/min(vel_fac))
 	if starting_left:
 		MoveToAbsolutePosition(0,0,0,0,1) ## We assume that we are at the left inlet
 	else:
